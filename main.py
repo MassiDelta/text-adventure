@@ -1,6 +1,4 @@
-import time
-import random
-import os
+import time, random, os
 inventory = {
     'allen wrench':
         {'qty':0, 'equ':False},
@@ -20,7 +18,7 @@ inventory = {
         {'qty':0, 'equ':False},
     'controller':
         {'qty':0, 'equ':False},
-    'blueprints':
+    '303 blueprints':
         {'qty':0, 'equ':False},
     'money':
         {'qty':2, 'equ':False},
@@ -41,6 +39,8 @@ inventory = {
     'first aid':
         {'qty':0, 'equ':False},
     'gear rope sign':
+        {'qty':0, 'equ':False},
+    '303 part':
         {'qty':0, 'equ':False},
     '1257 pin':
         {'qty':0, 'equ':False},
@@ -172,7 +172,7 @@ def location():
             pos = choose(6)
         if pos == 2590:
             if nemesisbot == False:
-                print("You are standing in the 1590 pit. Their robot lies, disabled, in the middle of the pit")
+                print("You are standing in the 2590 pit. Their robot lies, disabled, in the middle of the pit")
                 positem(2590)
                 print("1. leave\n2. take a pin\n3. item\n4. inventory")
                 if inventory['driver station']['qty'] == 0:
@@ -182,6 +182,12 @@ def location():
                     pos = choose(4)
             else:
                 event()
+        if pos == 747:
+            print("You are standing in 747's pit. You can see a large machine in the corner.\n1. go back\n2. look at the machine\n3. grab a pin\n4. item\n5. inventory")
+            pos = choose(5)
+        if pos == 7471:
+            print("Upon closer inspection, the machine seems to take a sheet of paper with blueprints on it and return a perfectly machined piece of metal.\n1. go back\n2. insert a sheet of paper\n3. inventory")
+            pos = choose(3)
         if pos == 1923:
             print("You are standing in the 1923 pit. Their robot is on a cart in the center of the pit. It seems to be on")
             positem(1923)
@@ -198,10 +204,7 @@ def location():
 
 
 def options(opt):
-    global pos
-    global name
-    global immorality
-    global scout
+    global pos, name, immorality, scout
     if pos == 0:
         if opt == 1:
             print("\nYou exit the bleachers")
@@ -278,6 +281,9 @@ def options(opt):
         if opt == 3 and inventory['driver pin']['qty'] == 0:
             print("\nYou spot a drivers pin on the counter of the stand. Someone must have forgotten it")
             inventory['driver pin']['qty'] += 1
+            return "h"
+        if opt == 3 and inventory['driver pin']['qty'] != 0:
+            print("\nIt's just a generic concession stand.")
             return "h"
         if opt == 5:
             ituse()
@@ -502,6 +508,45 @@ def options(opt):
         if opt == 5 and inventory['driver station']['qty'] == 0:
             inventory['driver station']['qty'] += 1
             return "h"
+    if pos == 747:
+        if opt == 1:
+            print("\nYou leave the pit")
+            return 9
+        if opt == 2:
+            print("\nYou walk up to the strange machine")
+            return 7471
+        if opt == 3:
+            pinget(747)
+            return "h"
+        if opt == 4:
+            ituse()
+            return "h"
+        if opt == 5:
+            invcheck()
+            return "h"
+    if pos == 7471:
+        if opt == 1:
+            print("\nYou back away from the machine")
+            return 747
+        if opt == 2:
+            for paper in inventory.keys():
+                if paper == '303 blueprints':
+                    print(f"- {paper}")
+            print("- cancel")
+            use = input("What do you put in? ")
+            if use == '303 blueprints':
+                print("\nYou slide the blueprints into the machine, and it starts making noise.\nAfter a few moments, a beautifully machined piece of metal slides out")
+                inventory['303 blueprints']['qty'] -= 1
+                inventory['303 part']['qty'] += 1
+                return "h"
+            elif use == 'cancel':
+                return 'h'
+            else:
+                print("Not an item")
+                return "h"
+        if opt == 3:
+            invcheck()
+            return "h"
     if pos == 1923:
         global insane
         if opt == 1:
@@ -544,12 +589,15 @@ def options(opt):
             if prize == 1 and inventory['tape measure']['qty'] != 0:
                 print("A miniture tape measure with a 303 logo falls out, however, you don't need another one.")
                 return "h"
-            if prize == 2 and inventory['blueprints']['qty'] == 0:
+            if prize == 2 and inventory['303 blueprints']['qty'] == 0 and inventory['303 part']['qty'] == 0:
                 print("A sheet of paper detailing plans for something falls out.")
-                inventory['blueprints']['qty'] += 1
+                inventory['303 blueprints']['qty'] += 1
                 return "h"
-            if prize == 2 and inventory['blueprints']['qty'] != 0:
+            if prize == 2 and inventory['303 blueprints']['qty'] != 0:
                 print("A sheet of paper detailing plans for something falls out, however, you don't need another one.")
+                return "h"
+            if prize == 2 and inventory['303 part']['qty'] != 0:
+                print("A sheet of paper detailing plans for a part falls out, however, you already machined the part in question.")
                 return "h"
             if prize == 3 and inventory['303 band']['qty'] == 0:
                 print('A wristband with "303" printed on the side falls out.')
@@ -575,10 +623,7 @@ def pinget(x):
         print("\nYou already took a pin")
 
 def frcgame():
-    global gameteams
-    global winner
-    global scout
-    global insane
+    global gameteams, winner, scout, insane
     e10 = 0
     e11 = 0
     e12 = 0
@@ -657,7 +702,7 @@ def frcgame():
     print("The match ends, and you jot down a few notes at the bottom of the sheet")
     time.sleep(5)
     os.system('clear')
-    qu = random.randint(0,4)
+    qu = random.randint(0,5)
     if qu == 0:
         ans = int(input(f"How many times did {steam} deliver a gear? "))
         if ans == e20:
@@ -683,7 +728,7 @@ def frcgame():
         else:
             scoutwrong()
     if qu == 3:
-        ans == input(f"Did {steam} climb? (Y/N) ")
+        ans = input(f"Did {steam} climb? (Y/N) ")
         if e30 == 0:
             if ans == 'N' or ans == 'n':
                 scoutcorrect()
@@ -700,10 +745,15 @@ def frcgame():
             scoutcorrect()
         else:
             scoutwrong()
+    if qu == 5:
+        ans = int(input(f"Hoy many times did {steam} lose a gear? "))
+        if ans == e21:
+            scoutcorrect()
+        else:
+            scoutwrong()
 
 def scoutcorrect():
-    global scout
-    global insane
+    global scout, insane
     print("You have scouted well.")
     inventory['scouting sheets']['qty']-=1
     scout+=1
@@ -727,8 +777,7 @@ def pachinko():
 
 
 def ituse():
-    global inventory
-    global spirit_shirt
+    global inventory, spirit_shirt
     for item in inventory.keys():
         if inventory[item]['qty']>0:
             print(f"- {item}")
@@ -822,6 +871,7 @@ def event():
                         if rchoice == 1:
                             print("You back out of the pit, and the robot seems to turn off")
                             pos = 9
+                            break
                         if rchoice == 2:
                             for item in inventory.keys():
                                 if inventory[item]['qty']>0:
@@ -852,6 +902,7 @@ def event():
 def loop():
     while True:
         e = input()
+        print(f"{e}")
 
 def death(x):
     if x == 1:
@@ -865,9 +916,9 @@ def death(x):
         for y in range(x):
             print("HAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA")
             time.sleep(.2)
-        time.sleep(1.5)
+        time.sleep(1)
         print("HA")
-        time.sleep(1.5)
+        time.sleep(1)
         print("\n\nYOU HAVE DIED")
         loop()
     if x == 2:
@@ -875,8 +926,7 @@ def death(x):
         loop()
 
 def awards():
-    global spiritwin
-    global spirit_shirt
+    global spiritwin, spirit_shirt
     if spirit_shirt == True:
         spiritwin = True
         print('"The winner of the Team Spirit Award is..."')
@@ -884,7 +934,9 @@ def awards():
         print('"Team 1257 Parallel Universe!"')
 
 
-name = input("Hey, welcome to this steaming pile of garbage I call a game.\nWho am I? That's not important.\nWhat is important, however, is your name.\n")
+name = input("Hey, welcome to this steaming pile of garbage I call a game!\nWho am I? That's not important.\nWhat is important, however, is your name.\n")
+print("(Note, for actions, enter the number associated with the action. For items, enter the name of the item to use it.)")
+time.sleep(.5)
 print(f"Well {name}, it's time to get up.")
 time.sleep(1)
 print("\n\n\nYou wake up in the stands of Stabler Arena during DCMP.\nHowever, nobody seems to be around, and the place seems to be abandoned.")
